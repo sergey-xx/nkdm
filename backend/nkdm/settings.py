@@ -93,6 +93,16 @@ DATABASES = {
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
 
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': os.getenv('REDIS_HOST'),
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+        }
+    }
+}
+
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -155,3 +165,5 @@ CELERY_TASK_TRACK_STARTED = True
 
 # Период отправки сообщений в днях
 EMAIL_SENDING_PERIOD = 1
+
+CACHE_TTL = 60  # время хранение кеша в секундах

@@ -1,6 +1,9 @@
-from django.shortcuts import render
+from django.conf import settings
 from django.shortcuts import get_object_or_404
-from rest_framework.permissions import (IsAuthenticated, IsAuthenticatedOrReadOnly)
+from rest_framework.permissions import (IsAuthenticated,
+                                        IsAuthenticatedOrReadOnly)
+from django.views.decorators.cache import cache_page
+from django.utils.decorators import method_decorator
 from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
@@ -12,16 +15,16 @@ from .serializers import PostSerializer
 from core.tasks import schedule_task
 
 class PostViewSet(viewsets.ModelViewSet):
-
     queryset = Post.objects.all()
     serializer_class = PostSerializer
     http_method_names = ['get', 'post']
-    permission_classes = [IsAuthenticatedOrReadOnly,]
+    permission_classes = [IsAuthenticatedOrReadOnly, ]
 
     def perform_create(self, serializer):
         blog = get_object_or_404(Blog, user=self.request.user)
         serializer.save(blog=blog)
 
+    @method_decorator(cache_page(settings.CACHE_TTL))
     def list(self, request, *args, **kwargs):
         if request.user.is_anonymous:
             queryset = Post.objects.order_by('-pk')[:500]
@@ -44,7 +47,7 @@ def follow_blog(request, blog_id):
     """Подписка на Блог."""
     blog = get_object_or_404(Blog, id=blog_id)
     follow = Follow.objects.filter(user=request.user,
-                             blog=blog)
+                                   blog=blog)
     if follow.exists():
         follow.delete()
         return Response("Вы отписались",
@@ -72,6 +75,7 @@ def read_post(request, post_id):
     read.save()
     return Response('Прочитано',
                     status=status.HTTP_201_CREATED,)
+
 
 @api_view(['POST', ])
 def create_tast_send_email(request):

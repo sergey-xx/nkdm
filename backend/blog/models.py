@@ -20,7 +20,7 @@ class Blog(models.Model):
 
 class Post(models.Model):
     title = models.CharField(max_length=100, blank=False)
-    text = models.TextField(validators=[MaxLengthValidator(140),])
+    text = models.TextField(validators=[MaxLengthValidator(140), ])
     pub_date = models.DateTimeField(auto_now_add=True,
                                     verbose_name="Дата публикации")
     blog = models.ForeignKey(Blog,

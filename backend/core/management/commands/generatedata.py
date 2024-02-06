@@ -3,18 +3,18 @@ import string
 
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
-from django.shortcuts import get_object_or_404
 
-from django.conf import settings
 from blog.models import Blog, Post
 
 
 User = get_user_model()
 
+
 def get_random_string(length):
     letters = string.ascii_lowercase
     result_str = ''.join(random.choice(letters) for i in range(length))
     return result_str
+
 
 def generate_users(amount):
     for i in range(amount):
@@ -26,10 +26,10 @@ def generate_users(amount):
         users = []
         if not User.objects.filter(username=username):
             users.append(User(username=username,
-                                first_name=first_name,
-                                last_name=last_name,
-                                password=password,
-                                email=email))
+                              first_name=first_name,
+                              last_name=last_name,
+                              password=password,
+                              email=email))
             User.objects.bulk_create(users)
 
 
