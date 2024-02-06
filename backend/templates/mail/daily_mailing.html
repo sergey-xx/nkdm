@@ -1,0 +1,15 @@
+{% extends "mail_templated/base.tpl" %}
+
+{% block subject %}
+  Ежедневная рассылка
+{% endblock %}
+
+{% block html %}
+  <br>
+  Вот ваша ежедневная подборка постов:
+  {% for post in posts %}
+  <h2> {{ post.title }} </h2>
+  {{ post.text}}
+  {% endfor %}
+  С уважением, Команда «Этот проект»
+{% endblock %}

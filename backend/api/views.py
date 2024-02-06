@@ -9,7 +9,7 @@ from rest_framework import status
 
 from blog.models import Post, Follow, Blog, Read
 from .serializers import PostSerializer
-from core.tasks import send_email_task
+from core.tasks import send_email_task, schedule_task
 
 class PostViewSet(viewsets.ModelViewSet):
 
@@ -52,6 +52,6 @@ def read_post(request, post_id):
 
 @api_view(['POST', ])
 def create_tast_send_email(request):
-    send_email_task.delay()
+    schedule_task()
     return Response('Отправка сообщений активирована',
                     status=status.HTTP_201_CREATED,)

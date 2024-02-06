@@ -1,8 +1,11 @@
 from time import sleep
+from django.contrib.auth import get_user_model
 from django.core.mail import send_mail
 from django_celery_beat.models import PeriodicTask, IntervalSchedule
 from celery import shared_task
+from core.emails import send_last_posts
 
+User = get_user_model()
 
 @shared_task()
 def send_email_task():
@@ -12,8 +15,15 @@ def send_email_task():
                   recipient_list=['mcpali4@mail.ru'],
                   from_email='mcpali4@mail.ru',
                   fail_silently=False,
-                  message='Banana message'
+                  message='Banana message',
                   )
+
+
+@shared_task()
+def daily_task():
+        users = User.objects.all()
+        for user in users:
+                send_last_posts(user)
 
 
 def schedule_task():
@@ -24,5 +34,5 @@ def schedule_task():
         PeriodicTask.objects.create(
                 interval=interval,
                 name='send_emails',
-                task='core.tasks.send_email_task'
+                task='core.tasks.daily_task'
         )
