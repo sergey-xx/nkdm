@@ -3,7 +3,7 @@ from django.core.management.base import BaseCommand
 
 from django.conf import settings
 
-from core.emails import send_last_posts
+from core.tasks import schedule_task
 
 
 
@@ -17,5 +17,5 @@ class Command(BaseCommand):
     help = 'Test command.'
 
     def handle(self, *args, **options):
-        user = User.objects.first()
-        send_last_posts(user)
+        schedule_task()
+    print('Отправка сообщений активирована')

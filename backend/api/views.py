@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.shortcuts import get_object_or_404
-from rest_framework.permissions import (AllowAny, IsAuthenticated,)
+from rest_framework.permissions import (IsAuthenticated, IsAuthenticatedOrReadOnly)
 from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
@@ -9,14 +9,29 @@ from rest_framework import status
 
 from blog.models import Post, Follow, Blog, Read
 from .serializers import PostSerializer
-from core.tasks import send_email_task, schedule_task
+from core.tasks import schedule_task
 
 class PostViewSet(viewsets.ModelViewSet):
 
-    queryset = Post.objects.order_by('-pk')[:500]
+    queryset = Post.objects.all()
     serializer_class = PostSerializer
-    http_method_names = ['get']
-    permission_classes = [AllowAny,]
+    http_method_names = ['get', 'post']
+    permission_classes = [IsAuthenticatedOrReadOnly,]
+
+    def perform_create(self, serializer):
+        blog = get_object_or_404(Blog, user=self.request.user)
+        serializer.save(blog=blog)
+
+    def list(self, request, *args, **kwargs):
+        queryset = Post.objects.order_by('-pk')[:500]
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
 
 
 @api_view(['POST', ])

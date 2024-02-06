@@ -1,10 +1,19 @@
 version: '3'
 
 volumes:
+  pg_data:
+  static_volume:
+  data_volume:
   redis_data:
-  sent_emails:
 
 services:
+  db:
+    image: postgres:13.10
+    env_file: .env
+    ports:
+      - 5432:5432
+    volumes:
+      - pg_data:/var/lib/postgresql/data/
   redis:
     image: redis/redis-stack-server:latest
     ports:
@@ -12,12 +21,32 @@ services:
       - 8001:8001
     volumes:
       - redis_data:/local-data/
+  backend:
+    build: ./backend/
+    env_file: .env
+    depends_on:
+      - db
+      - redis
+    volumes:
+      - static_volume:/backend_static/
+      - data_volume:/data/
+    ports:
+      - 8012:8012
   worker:
     build: ./backend/
+    env_file: .env
     command: celery -A nkdm worker --loglevel info
-    volumes:
-      - sent_emails:/app/sent_emails/
     links:
       - redis
     depends_on:
       - redis
+  beat:
+    build: ./backend/
+    env_file: .env
+    command: celery -A nkdm  beat -l INFO --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    links:
+      - redis
+    depends_on:
+      - worker
+    volumes:
+      - data_volume:/data/
