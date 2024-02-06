@@ -15,7 +15,7 @@ docker compose up
 ```
 
 
-Генерация 10 тестовых пользователей и постов.
+Генерация 10 тестовых пользователей и 10 постов у каждого.
 ```
 docker compose exec backend python manage.py generatedata 10
 ```
@@ -26,3 +26,8 @@ docker compose exec backend python manage.py sendmails
 ```
 
 Документация API лежит в "backend\docs\schema.yaml"
+
+'/api/v1/posts/' анонимам выдает все 500 постов. Авторизованным пользователям
+только из тех блогов, на которые они подписаны
+
+1000 анонимных запросов обрабатываются < 8 секунд 

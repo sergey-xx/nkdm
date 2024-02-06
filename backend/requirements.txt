@@ -9,7 +9,7 @@ click-plugins==1.1.1
 click-repl==0.3.0
 colorama==0.4.6
 cron-descriptor==1.4.3
-Django==3.2.16
+Django==4.1.13
 django-celery-beat==2.5.0
 django-mail-templated==2.6.5
 django-timezone-field==6.1.0

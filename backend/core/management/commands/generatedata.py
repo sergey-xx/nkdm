@@ -17,13 +17,13 @@ def get_random_string(length):
 
 
 def generate_users(amount):
+    users = []
     for i in range(amount):
         username = get_random_string(5)
         first_name = get_random_string(5)
         last_name = get_random_string(5)
         email = get_random_string(5) + '@' + '.com'
         password = get_random_string(10)
-        users = []
         if not User.objects.filter(username=username):
             users.append(User(username=username,
                               first_name=first_name,
@@ -31,6 +31,14 @@ def generate_users(amount):
                               password=password,
                               email=email))
             User.objects.bulk_create(users)
+
+
+def generate_blogs():
+    blogs = []
+    for user in User.objects.all():
+        if not Blog.objects.filter(user=user).exists():
+            blogs.append(Blog(user=user))
+    Blog.objects.bulk_create(blogs)
 
 
 def generate_post(blog, amount):
@@ -52,7 +60,9 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         amount = options['amount'][0]
-        generate_users(amount)
+        # generate_users(amount)
+
+        generate_blogs()
 
         blogs = Blog.objects.all()
         for blog in blogs:

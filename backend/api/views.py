@@ -1,18 +1,16 @@
-from django.conf import settings
 from django.shortcuts import get_object_or_404
 from rest_framework.permissions import (IsAuthenticated,
                                         IsAuthenticatedOrReadOnly)
-from django.views.decorators.cache import cache_page
-from django.utils.decorators import method_decorator
+
 from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework import status
 
-
 from blog.models import Post, Follow, Blog, Read
 from .serializers import PostSerializer
 from core.tasks import schedule_task
+
 
 class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all()
@@ -24,7 +22,6 @@ class PostViewSet(viewsets.ModelViewSet):
         blog = get_object_or_404(Blog, user=self.request.user)
         serializer.save(blog=blog)
 
-    @method_decorator(cache_page(settings.CACHE_TTL))
     def list(self, request, *args, **kwargs):
         if request.user.is_anonymous:
             queryset = Post.objects.order_by('-pk')[:500]
