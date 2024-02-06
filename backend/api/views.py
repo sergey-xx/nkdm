@@ -23,7 +23,11 @@ class PostViewSet(viewsets.ModelViewSet):
         serializer.save(blog=blog)
 
     def list(self, request, *args, **kwargs):
-        queryset = Post.objects.order_by('-pk')[:500]
+        if request.user.is_anonymous:
+            queryset = Post.objects.order_by('-pk')[:500]
+        else:
+            queryset = Post.objects.filter(
+                blog__following__user=self.request.user).order_by('-pk')[:500]
 
         page = self.paginate_queryset(queryset)
         if page is not None:
@@ -39,10 +43,12 @@ class PostViewSet(viewsets.ModelViewSet):
 def follow_blog(request, blog_id):
     """Подписка на Блог."""
     blog = get_object_or_404(Blog, id=blog_id)
-    if Follow.objects.filter(user=request.user,
-                             blog=blog).exists():
-        return Response("Already following!",
-                    status=status.HTTP_400_BAD_REQUEST)
+    follow = Follow.objects.filter(user=request.user,
+                             blog=blog)
+    if follow.exists():
+        follow.delete()
+        return Response("Вы отписались",
+                        status=status.HTTP_200_OK)
     follow = Follow.objects.create(user=request.user,
                                    blog=blog)
     follow.save()
@@ -55,14 +61,16 @@ def follow_blog(request, blog_id):
 def read_post(request, post_id):
     """Пометить пост прочитанным."""
     post = get_object_or_404(Post, id=post_id)
-    if Read.objects.filter(user=request.user,
-                           post=post).exists():
-        return Response("Уже прочитан!",
-                        status=status.HTTP_400_BAD_REQUEST)
+    read_post = Read.objects.filter(user=request.user,
+                                    post=post)
+    if read_post.exists():
+        read_post.delete()
+        return Response("Не прочитано",
+                        status=status.HTTP_200_OK)
     read = Read.objects.create(user=request.user,
                                post=post)
     read.save()
-    return Response('Пост помечен прочитанным',
+    return Response('Прочитано',
                     status=status.HTTP_201_CREATED,)
 
 @api_view(['POST', ])
