@@ -37,7 +37,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
+    'rest_framework.authtoken',
+    'django_celery_beat',
     'blog.apps.BlogConfig',
+    'api.apps.ApiConfig',
+    'core.apps.CoreConfig',
 ]
 
 MIDDLEWARE = [
@@ -124,3 +129,23 @@ STATIC_URL = '/static/'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10
+}
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_FILE_PATH = BASE_DIR / 'sent_emails'
+SERVER_EMAIL = 'from@example.com'
+
+CELERY_BROKER_URL = "redis://@localhost:6379/0"
+CELERY_RESULT_BACKEND = 'redis://@localhost:6379/1'
+CELERY_TASK_TRACK_STARTED = True

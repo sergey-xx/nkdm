@@ -1,0 +1,23 @@
+version: '3'
+
+volumes:
+  redis_data:
+  sent_emails:
+
+services:
+  redis:
+    image: redis/redis-stack-server:latest
+    ports:
+      - 6379:6379
+      - 8001:8001
+    volumes:
+      - redis_data:/local-data/
+  worker:
+    build: ./backend/
+    command: celery -A nkdm worker --loglevel info
+    volumes:
+      - sent_emails:/app/sent_emails/
+    links:
+      - redis
+    depends_on:
+      - redis
